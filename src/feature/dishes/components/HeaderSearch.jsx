@@ -1,29 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { FaSearch } from "react-icons/fa";
 import { fetchDishSuggestions } from "../api/dishes";
 
 const HeaderSearch = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const debounceRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timeout = setTimeout(async () => {
-      if (query.length >= 2) {
-        try {
-          const data = await fetchDishSuggestions(query);
-          setSuggestions(data);
-        } catch (err) {
-          console.error("Failed to fetch suggestions", err);
-        }
-      } else {
-        setSuggestions([]);
-      }
-    }, 300); // debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
-    return () => clearTimeout(timeout);
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const data = await fetchDishSuggestions(query);
+        setSuggestions(data);
+      } catch (err) {
+        console.error("Failed to fetch suggestions", err);
+      }
+    }, 400); // ⏱ You can adjust debounce delay here
+
+    return () => clearTimeout(debounceRef.current);
   }, [query]);
 
   const handleSelect = (dish) => {

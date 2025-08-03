@@ -126,7 +126,7 @@ const DishTable = () => {
                 <tr
                   key={dish.id}
                   className="hover:bg-gray-50 transition cursor-pointer"
-                  onClick={() => navigate(`/dishes/${dish.id}`)}
+                  onClick={() => navigate(`/dish/${dish.id}`)}
                 >
                   <td className="px-4 py-3 text-blue-600 font-medium hover:underline truncate max-w-[200px]">
                     {dish.name}
