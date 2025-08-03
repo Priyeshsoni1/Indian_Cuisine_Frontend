@@ -11,21 +11,19 @@ const DishList = ({ dishes, lastDishRef }) => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-screen-lg">
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {dishes.map((dish, index) => {
-          const isLast = index === dishes.length - 1;
-          return (
-            <div
-              key={`${dish.id}-${index}`}
-              ref={isLast ? lastDishRef : null}
-              className="animate-fadeIn"
-            >
-              <DishCard dish={dish} />
-            </div>
-          );
-        })}
-      </div>
+    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {dishes.map((dish, index) => {
+        const isLast = index === dishes.length - 1;
+        return (
+          <div
+            key={`${dish.id}-${index}`}
+            ref={isLast ? lastDishRef : null}
+            className="animate-fadeIn"
+          >
+            <DishCard dish={dish} />
+          </div>
+        );
+      })}
     </div>
   );
 };

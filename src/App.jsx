@@ -6,9 +6,12 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
+import { MdAdd } from "react-icons/md";
+
 import HomePage from "./feature/dishes/pages/HomePage";
 import DishDetailPage from "./feature/dishes/pages/DishDetailPage";
 import SuggestedDishesPage from "./feature/dishes/pages/SuggestDishesPage";
+import AddDishPage from "./feature/dishes/pages/AddDishPage";
 
 // NavItem Component – clean, responsive, colorful
 function NavItem({ to, children }) {
@@ -51,9 +54,10 @@ function Navbar() {
             🍽 Indian Cuisine
           </Link>
           <ul
-            className="flex items-center space-x-3 sm:space-x-6"
+            className="flex items-center space-x-1 sm:space-x-6"
             role="menubar"
           >
+            <NavItem to="/add">Add Dish</NavItem>
             <NavItem to="/">Home</NavItem>
             <NavItem to="/suggested">Suggested</NavItem>
           </ul>
@@ -75,6 +79,7 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/dish/:id" element={<DishDetailPage />} />
               <Route path="/suggested" element={<SuggestedDishesPage />} />
+              <Route path="/add" element={<AddDishPage />} />
             </Routes>
           </div>
         </main>

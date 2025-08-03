@@ -38,3 +38,21 @@ export const fetchDishById = async (id) => {
     return null;
   }
 };
+
+// src/api.js
+export const API_BASEe = "http://localhost:4000/api";
+
+export async function createDish(data) {
+  const res = await fetch(`${API_BASEe}/dishes/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Failed to create dish");
+  }
+
+  return res.json();
+}

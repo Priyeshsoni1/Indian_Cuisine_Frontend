@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { fetchAllDishes } from "../api/dishes";
 import { useNavigate } from "react-router-dom";
-import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/20/solid";
 import DishLoader from "./Loader";
 
 const pageSize = 10;
@@ -17,8 +22,7 @@ const DishTable = () => {
 
   useEffect(() => {
     const loadDishes = async () => {
-      setLoading(true);
-      const result = await fetchAllDishes(pageIndex, pageSize); // Only send pagination
+      const result = await fetchAllDishes(pageIndex, pageSize);
       const sorted = [...(result.data || [])].sort((a, b) => {
         const valA = a[sortBy];
         const valB = b[sortBy];
@@ -31,7 +35,6 @@ const DishTable = () => {
       });
       setDishes(sorted);
       setTotalPages(result.totalPages);
-      setLoading(false);
     };
     loadDishes();
   }, [pageIndex, sortBy, sortOrder]);
@@ -48,17 +51,41 @@ const DishTable = () => {
   const getSortIcon = (field) => {
     if (sortBy !== field) return null;
     return sortOrder === "asc" ? (
-      <ChevronUpIcon className="w-4 h-4 ml-1 text-gray-500" />
+      <ChevronUpIcon className="w-4 h-4 text-gray-500" />
     ) : (
-      <ChevronDownIcon className="w-4 h-4 ml-1 text-gray-500" />
+      <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+    );
+  };
+
+  const formatIngredients = (ingredients = []) => {
+    const visible = ingredients.slice(0, 4);
+    const extraCount = ingredients.length - visible.length;
+    return (
+      <div title={ingredients.join(", ")} className="flex flex-wrap gap-1">
+        {visible.map((ing, i) => (
+          <span
+            key={i}
+            className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-1 rounded-full"
+          >
+            {ing}
+          </span>
+        ))}
+        {extraCount > 0 && (
+          <span className="text-xs text-gray-500 px-2 py-1">
+            +{extraCount} more
+          </span>
+        )}
+      </div>
     );
   };
 
   return (
-    <div className="p-4">
-      <div className="overflow-x-auto rounded shadow">
-        <table className="w-full border border-gray-200 text-sm text-left">
-          <thead className="bg-gray-100 text-gray-800 uppercase tracking-wider">
+    <div className="p-6 bg-white rounded-xl shadow-md">
+      <h2 className="text-xl font-semibold mb-4 text-gray-800">Dishes</h2>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm text-left">
+          <thead className="bg-gradient-to-r from-indigo-50 to-blue-100 text-gray-600 uppercase text-xs font-semibold">
             <tr>
               {[
                 { label: "Name", field: "name" },
@@ -67,13 +94,18 @@ const DishTable = () => {
                 { label: "Diet", field: "diet" },
                 { label: "Flavor", field: "flavor_profile" },
                 { label: "State", field: "region" },
+                { label: "Ingredients", field: "ingredients" },
               ].map(({ label, field }) => (
                 <th
                   key={field}
-                  onClick={() => toggleSort(field)}
-                  className="cursor-pointer px-4 py-3 border border-gray-200 hover:bg-gray-200 transition select-none"
+                  onClick={() => field !== "ingredients" && toggleSort(field)}
+                  className={`px-4 py-3 whitespace-nowrap ${
+                    field !== "ingredients"
+                      ? "cursor-pointer hover:bg-blue-50 transition rounded-t"
+                      : ""
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
                     {label}
                     {getSortIcon(field)}
                   </div>
@@ -81,34 +113,39 @@ const DishTable = () => {
               ))}
             </tr>
           </thead>
-          <tbody>
+
+          <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-400">
+                <td colSpan="7" className="text-center py-10">
                   <DishLoader />
                 </td>
               </tr>
             ) : dishes.length > 0 ? (
               dishes.map((dish) => (
-                <tr key={dish.id} className="hover:bg-gray-50 transition">
-                  <td
-                    onClick={() => navigate(`/dishes/${dish.id}`)}
-                    className="border px-4 py-2 text-blue-600 hover:underline cursor-pointer"
-                  >
+                <tr
+                  key={dish.id}
+                  className="hover:bg-gray-50 transition cursor-pointer"
+                  onClick={() => navigate(`/dishes/${dish.id}`)}
+                >
+                  <td className="px-4 py-3 text-blue-600 font-medium hover:underline truncate max-w-[200px]">
                     {dish.name}
                   </td>
-                  <td className="border px-4 py-2">{dish.prep_time} min</td>
-                  <td className="border px-4 py-2">{dish.cook_time} min</td>
-                  <td className="border px-4 py-2 capitalize">{dish.diet}</td>
-                  <td className="border px-4 py-2 capitalize">
+                  <td className="px-4 py-3">{dish.prep_time} min</td>
+                  <td className="px-4 py-3">{dish.cook_time} min</td>
+                  <td className="px-4 py-3 capitalize">{dish.diet}</td>
+                  <td className="px-4 py-3 capitalize">
                     {dish.flavor_profile}
                   </td>
-                  <td className="border px-4 py-2 capitalize">{dish.region}</td>
+                  <td className="px-4 py-3 capitalize">{dish.region}</td>
+                  <td className="px-4 py-3">
+                    {formatIngredients(dish.ingredients)}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-400">
+                <td colSpan="7" className="text-center py-10 text-gray-400">
                   No dishes found.
                 </td>
               </tr>
@@ -117,25 +154,30 @@ const DishTable = () => {
         </table>
       </div>
 
-      <div className="flex justify-between items-center mt-6 text-sm">
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-6">
         <button
           onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
           disabled={pageIndex === 0}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
         >
-          Previous
+          <ChevronLeftIcon className="w-4 h-4" />
+          Prev
         </button>
-        <p className="text-gray-700">
-          Page {pageIndex + 1} of {totalPages}
-        </p>
+
+        <span className="text-sm text-gray-700">
+          Page <strong>{pageIndex + 1}</strong> of <strong>{totalPages}</strong>
+        </span>
+
         <button
           onClick={() =>
             setPageIndex((prev) => Math.min(prev + 1, totalPages - 1))
           }
           disabled={pageIndex + 1 >= totalPages}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
         >
           Next
+          <ChevronRightIcon className="w-4 h-4" />
         </button>
       </div>
     </div>
