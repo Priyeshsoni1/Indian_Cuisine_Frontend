@@ -1,7 +1,13 @@
 # start :
 
+Add in backend URL in .env file (VITE_API_BASE_URL=https://indian-cuisine-backend-xbgi.onrender.com/api) ya Local URL
+
 npm install
 npm run dev
+
+# Deployed URL
+
+https://indian-cuisine-frontend.vercel.app/
 
 # Indian Cuisine System
 
