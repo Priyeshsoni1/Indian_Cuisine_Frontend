@@ -1,31 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchDishByName } from "../api/dishes";
+
+import { FaSearch } from "react-icons/fa";
+import { fetchDishSuggestions } from "../api/dishes";
 
 const HeaderSearch = () => {
   const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
 
-  const handleSearch = async () => {
-    const res = await fetchDishByName(query);
-    if (res) navigate(`/dish/${res.id}`, { state: { dish: res } });
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if (query.length >= 2) {
+        try {
+          const data = await fetchDishSuggestions(query);
+          setSuggestions(data);
+        } catch (err) {
+          console.error("Failed to fetch suggestions", err);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    }, 300); // debounce
+
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  const handleSelect = (dish) => {
+    navigate(`/dish/${dish.id}`, { state: { dish } });
+    setQuery("");
+    setSuggestions([]);
   };
 
   return (
-    <div className="flex gap-2 p-4">
-      <input
-        type="text"
-        className="border rounded px-4 py-2 w-full"
-        placeholder="Search dish by name"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <button
-        className="bg-green-600 text-white px-4 py-2 rounded"
-        onClick={handleSearch}
-      >
-        Search
-      </button>
+    <div className="relative max-w-xl w-full mx-auto mt-4">
+      <div className="flex items-center bg-white border border-gray-300 rounded-full px-4 py-2 shadow-sm">
+        <FaSearch className="text-gray-400 mr-2" />
+        <input
+          type="text"
+          placeholder="Search dishes by name, ingredient or region..."
+          className="w-full outline-none text-sm"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
+      {suggestions.length > 0 && (
+        <ul className="absolute z-10 w-full bg-white shadow-lg mt-2 rounded-lg max-h-60 overflow-auto">
+          {suggestions.map((dish, index) => (
+            <li
+              key={`${dish.id}-${index}`}
+              onClick={() => handleSelect(dish)}
+              className="px-4 py-2 cursor-pointer hover:bg-orange-50"
+            >
+              <strong>{dish.name}</strong>{" "}
+              <span className="text-sm text-gray-500">({dish.region})</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
